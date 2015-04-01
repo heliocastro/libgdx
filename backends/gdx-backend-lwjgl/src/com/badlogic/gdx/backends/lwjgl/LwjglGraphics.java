@@ -176,6 +176,18 @@ public class LwjglGraphics implements Graphics {
 	}
 
 	private void createDisplayPixelFormat () {
+		if ("GLES".equals(System.getProperty("LWJGJ_BACKEND"))){
+			try {
+				System.out.println("Using OpenGLES...");
+				org.lwjgl.opengl.DisplayMode displayMode = org.lwjgl.opengl.Display.getDesktopDisplayMode();
+				org.lwjgl.opengl.Display.setDisplayMode(displayMode);
+				Display.setVSyncEnabled(true);
+				Display.setFullscreen(true);
+				Display.create(new org.lwjgl.opengles.PixelFormat());
+			} catch (Exception glesEx) {
+				throw new GdxRuntimeException("Unable to create OpenGLES display.", glesEx);
+			}
+		} else {
 		try {
 			if (config.useGL30) {
 				ContextAttribs context = new ContextAttribs(3, 2).withForwardCompatible(false).withProfileCore(true);
@@ -240,9 +252,15 @@ public class LwjglGraphics implements Graphics {
 				}
 			}
 		}
+		}
 	}
 
 	public void initiateGLInstances () {
+		//ChrisH : Lwjgl OpenGLES support (for Raspberry Pi):
+		if ("GLES".equals(System.getProperty("LWJGJ_BACKEND"))){
+			System.out.println("Using LwjgjGLES20");
+			gl20 = new LwjglGLES20();
+		} else {
 		String version = org.lwjgl.opengl.GL11.glGetString(GL11.GL_VERSION);
 		major = Integer.parseInt("" + version.charAt(0));
 		minor = Integer.parseInt("" + version.charAt(2));
@@ -262,6 +280,7 @@ public class LwjglGraphics implements Graphics {
 				throw new GdxRuntimeException("OpenGL 2.0 or higher with the FBO extension is required. OpenGL version: " + version
 					+ ", FBO extension: false" + (glInfo.isEmpty() ? "" : ("\n" + glInfo())));
 			}
+		}
 		}
 
 		Gdx.gl = gl20;
