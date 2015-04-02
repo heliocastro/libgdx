@@ -256,11 +256,6 @@ public class LwjglGraphics implements Graphics {
 	}
 
 	public void initiateGLInstances () {
-		//ChrisH : Lwjgl OpenGLES support (for Raspberry Pi):
-		if ("GLES".equals(System.getProperty("LWJGJ_BACKEND"))){
-			System.out.println("Using LwjgjGLES20");
-			gl20 = new LwjglGLES20();
-		} else {
 		String version = org.lwjgl.opengl.GL11.glGetString(GL11.GL_VERSION);
 		major = Integer.parseInt("" + version.charAt(0));
 		minor = Integer.parseInt("" + version.charAt(2));
@@ -269,19 +264,12 @@ public class LwjglGraphics implements Graphics {
 			gl30 = new LwjglGL30();
 			gl20 = gl30;
 		} else {
-			gl20 = new LwjglGL20();
+			System.out.println("Using LwjgjGLES20 for PI");
+			gl20 = new LwjglGLES20();
 		}
 
 		if (major <= 1)
 			throw new GdxRuntimeException("OpenGL 2.0 or higher with the FBO extension is required. OpenGL version: " + version);
-		if (major == 2 || version.contains("2.1")) {
-			if (!supportsExtension("GL_EXT_framebuffer_object") && !supportsExtension("GL_ARB_framebuffer_object")) {
-				String glInfo = glInfo();
-				throw new GdxRuntimeException("OpenGL 2.0 or higher with the FBO extension is required. OpenGL version: " + version
-					+ ", FBO extension: false" + (glInfo.isEmpty() ? "" : ("\n" + glInfo())));
-			}
-		}
-		}
 
 		Gdx.gl = gl20;
 		Gdx.gl20 = gl20;
